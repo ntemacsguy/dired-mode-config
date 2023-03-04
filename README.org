@@ -29,15 +29,16 @@
     (define-key dired-mode-map (kdb "C-c l" 'open-with))
     
 #+end_src
-- open-in-terminal opens windows terminal in it's default shell at the dired buffers location. Similar to command-prompt-here but for windows terminal. Requires "startingDirectory": null in your settings.json file for your default shell. 
+- open-in-terminal opens windows terminal in it's default shell at the dired buffers location. Similar to the old "command prompt here" but for dired and windows terminal. it requires that you have "startingDirectory": null in your settings.json file for your default shell.
 #+begin_src emacs-lisp
 
   (with-eval-after-load 'dired
     (defun open-in-terminal ()
+      (setq async-shell-command-display-buffer nil)
       (interactive)
       (async-shell-command (concat "wt -d "(symbol-value 'dired-directory)))))
   (define-key dired-mode-map (kdb "C-c t") 'open-in-terminal)
-  
+
 #+end_src
 * Dired-mode packages
 ** These packages are useful in normal Emacs as well as NTEmacs    
