@@ -1,0 +1,82 @@
+#+title:Dired-mode 
+#+STARTUP: align
+#+OPTIONS: toc:t
+* Dired-mode
+- Dired-mode is a wonderfully useful feature built into Emacs but in NTEmacs I found it is somewhat lacking. In this repo I'll attempt to extend the base functionality using the [[https://www.gnu.org/software/emacs/refcards/pdf/dired-ref.pdf][dired reference card]] as inspiration for the keyboard shortcuts. Also included here is the use of other packages I've found helpful.
+ #+begin_src emacs-lisp
+
+   (use-package dired
+     :ensure nil
+     ;; dired-jump opens dired at the location of the file in the current buffer
+     :commands (dired dired-jump)
+     :bind (("C-x C-j" . dired-jump))
+     :custom
+     ;; provides detailed folder and file information in the dired buffer and groups directories first
+     (dired-listing-switches "--agho --group-directories-first"))
+
+ #+end_src
+* Dired-mode packages
+** These packages are useful in normal Emacs as well as NTEmacs    
+  - dired-single doesn't prevent you from having multple dired buffers but aims to prevent you from having multple dired buffers in the same location.
+#+begin_src emacs-lisp
+
+  (use-package dired-single)
+
+#+end_src
+- dired-ranger provides a mult-stage copy paste workflow and bookmarking fuctionality.
+#+begin_src emacs-lisp
+
+  (use-package dired-ranger
+  :ensure t
+  :bind (:map dired-mode-map
+              ("W" . dired-ranger-copy)
+              ("X" . dired-ranger-move)
+              ("Y" . dired-rangerpaste)
+              ("B" . dired-ranger-bookmark)
+              ("V" . dired-ranger-bookark-visit)))
+
+#+end_src
+- dired-subtree allows you to expand and collaps folfers in the current dired buffer
+#+begin_src emacs-lisp
+
+  (use-package dired-subtree
+    :config
+    (bind--keys :map dired-mode-map
+                ("i" . dired-subtree-insert)
+                (";" . dired-subtree-remove)))
+
+#+end_src
+* Custom functions
+** These functions are NTEmacs specific
+- open-with uses your file associations to open files in the programs you've set for their file extensions. So .docx opens Word and .pdf opens Adobe reader or whatever you've setup in your system.
+#+begin_src emacs-lisp
+
+  (with-eval-after-load 'dired
+    (defun open-with ()
+      (interactive)
+      (let ((filename (dired-replace-in-string "/"
+                                               "\\"
+                                               (dired-get-filename))))
+        (w32-shell-execute 1 filename)))
+    (define-key dired-mode-map (kdb "C-c l" 'open-with))
+    
+#+end_src
+- open-in-terminal opens windows terminal in it's default shell at the dired buffers location. Similar to command-prompt-here but for windows terminal. Requires "startingDirectory": null in your settings.json file for your default shell. 
+#+begin_src emacs-lisp
+
+  (with-eval-after-load 'dired
+    (defun open-in-terminal ()
+      (interactive)
+      (async-shell-command (concat "wt -d "(symbol-value 'dired-directory)))))
+  (define-key dired-mode-map (kdb "C-c t") 'open-in-terminal)
+  
+#+end_src
+* GIT
+- Don't mind me just getting some git management out of the way.
+#+begin_src shell :tangle ./.gitignore
+  
+  !.gitignore
+  !*.org
+  !LICENSE
+
+#+end_src
